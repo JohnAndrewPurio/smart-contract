@@ -96,7 +96,7 @@ mod exec {
 
         let admins: StdResult<Vec<_>> = admins
             .into_iter()
-            .map(|addr| deps.api.addr_validate(&addr))
+            .map(|addr: String| deps.api.addr_validate(&addr))
             .collect();
 
         curr_admins.append(&mut admins?);
@@ -148,6 +148,56 @@ mod tests {
     use super::*;
     use cosmwasm_std::{coins, Addr};
     use cw_multi_test::{App, ContractWrapper, Executor};
+
+    #[test]
+    fn duplicate_admin() {
+        let mut app = App::new(|router, _, storage| {
+            let user_balance = coins(5, "eth");
+            router
+                .bank
+                .init_balance(storage, &Addr::unchecked("user"), user_balance)
+                .unwrap();
+        });
+
+        let code = ContractWrapper::new(execute, instantiate, query);
+        let code_id = app.store_code(Box::new(code));
+
+        let addr = app
+            .instantiate_contract(
+                code_id,
+                Addr::unchecked("owner"),
+                &InstantiateMsg {
+                    admins: vec!["admin1".to_owned(), "admin2".to_owned()],
+                    donation_denom: "eth".to_owned(),
+                },
+                &[],
+                "Sketchy Contract",
+                None,
+            )
+            .unwrap();
+
+        app.execute_contract(
+            Addr::unchecked("admin1"),
+            addr.clone(),
+            &ExecuteMsg::AddMembers {
+                admins: vec!["admin1".to_owned()],
+            },
+            &[],
+        )
+        .unwrap();
+
+        app.execute_contract(
+            Addr::unchecked("user"),
+            addr.clone(),
+            &ExecuteMsg::Donate {},
+            &coins(5, "eth"),
+        )
+        .unwrap();
+
+        // assert_eq!(
+            
+        // );
+    }
 
     #[test]
     fn donations() {

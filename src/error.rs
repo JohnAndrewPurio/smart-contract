@@ -12,4 +12,7 @@ pub enum ContractError {
 
     #[error("Payment error: {0}")]
     Payment(#[from] PaymentError),
+
+    #[error("{sender} is already an admin")]
+    DuplicateAdminId { sender: Addr }
 }
