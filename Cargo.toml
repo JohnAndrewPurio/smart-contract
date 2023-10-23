@@ -4,13 +4,19 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+library = []
 
 [dependencies]
 cosmwasm-std = { version = "1.0.0-beta8", features = ["staking"] }
 serde = { version = "1.0.103", default-features = false, features = ["derive"] }
 cw-storage-plus = "1.1.0"
-thiserror = "1"
+thiserror = "1.0.50"
+schemars = "0.8.15"
+cw-utils = "1.0.2"
 
 [dev-dependencies]
 cw-multi-test = "0.17.0"
+cosmwasm-schema = { version = "1.0.0" }
